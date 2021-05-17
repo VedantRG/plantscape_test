@@ -4,28 +4,25 @@ import pickle
 import base64
 import cv2
 import os
-from tensorflow.keras.models import Sequential, Model
-from tensorflow.keras.layers import Dense
-from tensorflow.python.keras.layers import deserialize, serialize
-from tensorflow.python.keras.saving import saving_utils
-from tensorflow.keras.models import Sequential, Model
-
+from keras.models import load_model
 
 app = Flask(__name__)
 
 
 
-def unpack(model, training_config, weights):
-    restored_model = deserialize(model)
-    if training_config is not None:
-        restored_model.compile(
-            **saving_utils.compile_args_from_training_config(
-                training_config
-            )
-        )
-    restored_model.set_weights(weights)
-    return restored_model
+# def unpack(model, training_config, weights):
+#     restored_model = deserialize(model)
+#     if training_config is not None:
+#         restored_model.compile(
+#             **saving_utils.compile_args_from_training_config(
+#                 training_config
+#             )
+#         )
+#     restored_model.set_weights(weights)
+#     return restored_model
 
+pickle_model = load_model('model.h5')
+print("MODEL loaded")
 
 @app.route('/sendImage', methods= ['POST'])
 def get_image():
@@ -52,13 +49,13 @@ def predict():
     img = cv2.resize(img,default_image_size)   
     #img = img_to_array(img)
     #img = img/1.0
-    np_image =  np.array(img, dtype=np.float16) / 225.0
+    np_image =  np.array(img, dtype=np.float16) / 255.0
     np_image = np_image.reshape((1, 256, 256, 3))
     print(np_image)
     # Make prediction using model loaded from disk as per the data.
     
-    with open('MobileNet_200_30ep_50BS_aug_8_1_1.pkl', 'rb') as file:
-        pickle_model = pickle.load(file)
+    # with open('MobileNet_200_30ep_50BS_aug_8_1_1.pkl', 'rb') as file:
+    #     pickle_model = dill.load(file)
 
     Ypredict = pickle_model.predict(np_image)
 
